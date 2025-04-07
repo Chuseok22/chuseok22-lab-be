@@ -1,6 +1,6 @@
 package com.chuseok22.lab.global.aspect;
 
-import com.romrom.romback.global.exception.ErrorCode;
+import com.chuseok22.lab.global.exception.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
