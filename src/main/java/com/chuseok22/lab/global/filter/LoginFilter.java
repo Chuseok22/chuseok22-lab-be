@@ -84,6 +84,10 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     cookie.setPath("/");
     cookie.setMaxAge((int) (jwtUtil.getRefreshExpirationTime() / 1000)); // 쿠키 maxAge는 초 단위 이므로, 밀리초를 1000으로 나눔
     response.addCookie(cookie);
+
+    // TODO: Swagger 테스트를 위한 임시 반환
+    response.getWriter().write("AccessToken: "+ accessToken + "\n");
+    response.getWriter().write("RefreshToken: " + refreshToken);
   }
 
   //로그인 실패시 실행하는 메소드
