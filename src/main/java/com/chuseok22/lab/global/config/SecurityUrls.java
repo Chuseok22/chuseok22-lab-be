@@ -31,6 +31,8 @@ public class SecurityUrls {
       "/api/auth/join", // 회원가입
       "/api/auth/login", // 로그인
       "/api/auth/reissue", // 액세스 토큰 재발급
+      "/api/auth/validate/username", // 아이디 중복 검증
+      "/api/auth/validate/nickname", // 닉네임 중복 검증
       "/", // 홈
 
 
