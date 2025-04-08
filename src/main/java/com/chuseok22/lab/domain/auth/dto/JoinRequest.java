@@ -15,11 +15,15 @@ import lombok.ToString;
 @Getter
 @Setter
 @Builder
-public class LoginRequest {
-  @NotBlank(message = "아이디를 입력하세요")
+public class JoinRequest {
+
+  @NotBlank(message = "이이디를 입력하세요")
   @Schema(defaultValue = "exampleUsername123")
   private String username;
   @NotBlank(message = "비밀번호를 입력하세요")
   @Schema(defaultValue = "examplePassword123")
   private String password;
+  @NotBlank(message = "닉네임을 입력하세요")
+  @Schema(defaultValue = "exampleNickname123")
+  private String nickname;
 }
