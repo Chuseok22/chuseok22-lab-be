@@ -33,6 +33,14 @@ public enum ErrorCode {
   // MEMBER
 
   MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "회원을 찾을 수 없습니다."),
+
+  // GITHUB
+
+  GITHUB_ISSUE_PROCESSING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Github 이슈 처리 과정 중 오류가 발생했습니다."),
+
+  GITHUB_ISSUE_PARSING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Github 이슈 파싱 중 오류가 발생했습니다."),
+
+  GITHUB_ISSUE_SAVE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Github 이슈 저장 중 오류가 발생했습니다."),
   ;
 
   private final HttpStatus status;
