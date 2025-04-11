@@ -76,7 +76,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     // 헤더에 AccessToken 추가
     response.addHeader("Authorization", "Bearer " + accessToken);
-    response.setHeader("Access-Control-Expose-Headers", "Authorization");
 
     // 쿠키에 refreshToken 추가
     Cookie cookie = new Cookie("refreshToken", refreshToken);
