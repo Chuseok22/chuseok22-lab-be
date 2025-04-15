@@ -41,6 +41,10 @@ public enum ErrorCode {
   GITHUB_ISSUE_PARSING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Github 이슈 파싱 중 오류가 발생했습니다."),
 
   GITHUB_ISSUE_SAVE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Github 이슈 저장 중 오류가 발생했습니다."),
+
+  // WEB API
+
+  RESPONSE_BODY_EMPTY(HttpStatus.BAD_REQUEST, "응답 Body가 null입니다."),
   ;
 
   private final HttpStatus status;

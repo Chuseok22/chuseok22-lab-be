@@ -12,13 +12,14 @@ public class WebClientConfig {
   private static final String BASE_URL = "https://github.com";
 
   @Bean
-  public WebClient webClient(WebClient.Builder builder) {
-    return builder
+  public WebClient webClient() {
+    return WebClient.builder()
         .baseUrl(BASE_URL)
         .defaultHeaders(httpHeaders -> {
           httpHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
         })
+        .codecs(clientCodecConfigurer -> clientCodecConfigurer
+            .defaultCodecs().maxInMemorySize(16 * 1024 * 1024)) // 16MB
         .build();
   }
-
 }
