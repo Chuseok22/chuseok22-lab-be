@@ -1,4 +1,4 @@
-package com.chuseok22.lab.domain.issue.helper.dto;
+package com.chuseok22.lab.domain.github.issue.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
