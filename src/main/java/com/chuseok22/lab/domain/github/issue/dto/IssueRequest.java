@@ -17,4 +17,6 @@ import lombok.ToString;
 public class IssueRequest {
   @NotBlank
   private String issueUrl;
+
+  private String githubToken;
 }

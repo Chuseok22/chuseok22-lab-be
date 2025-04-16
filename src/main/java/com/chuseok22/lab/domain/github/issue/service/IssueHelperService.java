@@ -1,9 +1,12 @@
 package com.chuseok22.lab.domain.github.issue.service;
 
+import com.chuseok22.lab.domain.github.api.dto.GithubIssueApiResponse;
+import com.chuseok22.lab.domain.github.api.service.GithubApiService;
 import com.chuseok22.lab.domain.github.issue.domain.IssueHelper;
 import com.chuseok22.lab.domain.github.issue.dto.IssueRequest;
 import com.chuseok22.lab.domain.github.issue.dto.IssueResponse;
 import com.chuseok22.lab.domain.github.issue.repository.IssueHelperRepository;
+import com.chuseok22.lab.domain.member.domain.Member;
 import com.chuseok22.lab.global.exception.CustomException;
 import com.chuseok22.lab.global.exception.ErrorCode;
 import com.chuseok22.lab.global.util.WebClientService;
@@ -11,8 +14,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -22,6 +23,7 @@ public class IssueHelperService {
 
   private final WebClientService webClientService;
   private final IssueHelperRepository issueHelperRepository;
+  private final GithubApiService githubApiService;
 
   /**
    * 입력된 URL을 처리해 브랜치명과 커밋 케시지 반환
@@ -29,16 +31,18 @@ public class IssueHelperService {
    * 2. 있으면 DB 데이터 반환
    * 3. 없으면 파싱 후 저장 및 반환
    */
-  public IssueResponse processIssueHelper(IssueRequest request) {
+  public IssueResponse processIssueHelper(Member member, IssueRequest request) {
 
     String issueUrl = request.getIssueUrl();
+    String token = request.getGithubToken();
+
     try {
       IssueHelper issueHelper = issueHelperRepository.findByIssueUrl(issueUrl);
-      if (issueHelper == null) {
-        log.debug("새로운 URL, 파싱 시작: {}", issueUrl);
-        issueHelper = parseIssue(issueUrl);
-      } else {
+      if (issueHelper != null) {
         log.debug("DB에서 기존 이슈 조회: {}", issueUrl);
+      } else {
+        log.debug("새로운 URL 요청: Issue 파싱 시작");
+        issueHelper = parseIssue(member, issueUrl, token);
       }
       return IssueResponse.builder()
           .branchName(issueHelper.getBranchName())
@@ -50,28 +54,22 @@ public class IssueHelperService {
     }
   }
 
-
   /**
    * 사용자로부터 URL을 입력 받아 브랜치 명, 커밋 메시지를 생성 후 저장
    *
    * @param issueUrl issueUrl
    * @return branchName, commitMessage
    */
-  public IssueHelper parseIssue(String issueUrl) {
+  private IssueHelper parseIssue(Member member, String issueUrl, String token) {
     try {
-      // WebClient로 HTML 가져오기
-      String html = webClientService.getHtml(issueUrl);
-
-      // HTML 파싱
-      Document document = Jsoup.parse(html);
-      String rawTitle = document.title();
-      log.debug("파싱된 원본 제목: {}", rawTitle);
+      // Github API 호출
+      GithubIssueApiResponse githubIssueApiResponse = githubApiService.fetchIssue(member, issueUrl, token);
 
       // 이슈 번호 추출
       String issueNumber = extractIssueNumber(issueUrl);
 
       // 이슈 제목 추출
-      String issueTitle = extractIssueTitle(rawTitle);
+      String issueTitle = extractIssueTitle(githubIssueApiResponse.title());
 
       // 브랜치명 생성
       String branchName = createBranchName(issueTitle, issueNumber);
@@ -86,7 +84,7 @@ public class IssueHelperService {
           .commitMessage(commitMessage)
           .build();
 
-      log.debug("Issue 파싱 성공: {}", issueHelper.getIssueUrl());
+      log.debug("Issue 파싱 및 저장 성공: {}", issueHelper.getIssueUrl());
       return issueHelperRepository.save(issueHelper);
     } catch (Exception e) {
       log.error("Issue 파싱중 오류 발생: {}", e.getMessage());
@@ -103,22 +101,19 @@ public class IssueHelperService {
 
   // 이슈 제목 추출
   private String extractIssueTitle(String rawTitle) {
-    // 1. '· Issue #' 이후의 부분 제거
-    int issueIndex = rawTitle.indexOf("· Issue #");
-    String title = issueIndex != -1 ? rawTitle.substring(0, issueIndex).trim() : rawTitle.trim();
 
-    // 2. 태그([기능개선][알림]) 제거
-    String cleanedTitle = title.replaceAll("\\[.*?]", "").trim();
-    if (cleanedTitle.equals(title) && !title.startsWith("[")) {
+    // 태그([기능개선][알림]) 제거
+    String title = rawTitle.replaceAll("\\[.*?]", "").trim();
+    if (title.equals(rawTitle) && !rawTitle.startsWith("[")) {
       // 태그가 없는 경우 원본 제목 사용
-      cleanedTitle = title;
+      title = rawTitle;
     }
 
-    // 3. 이모지(🚀) 및 불필요한 공백 제거
-    cleanedTitle = cleanedTitle.replaceAll("[\\p{So}\\p{C}\\uFE0F\\u200D]", "").trim();
+    // 이모지(🚀) 및 불필요한 공백 제거
+    title = title.replaceAll("[\\p{So}\\p{C}\\uFE0F\\u200D]", "").trim();
 
-    log.debug("가공된 이슈 제목: {}", cleanedTitle);
-    return cleanedTitle;
+    log.debug("가공된 이슈 제목: {}", title);
+    return title;
   }
 
   // 브랜치명 생성
