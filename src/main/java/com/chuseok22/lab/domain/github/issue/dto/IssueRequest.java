@@ -1,5 +1,6 @@
-package com.chuseok22.lab.domain.issue.helper.dto;
+package com.chuseok22.lab.domain.github.issue.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,9 +14,9 @@ import lombok.ToString;
 @Getter
 @Setter
 @Builder
-public class IssueResponse {
+public class IssueRequest {
+  @NotBlank
+  private String issueUrl;
 
-  private String branchName;
-
-  private String commitMessage;
+  private String githubToken;
 }

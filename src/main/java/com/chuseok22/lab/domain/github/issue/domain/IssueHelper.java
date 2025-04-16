@@ -1,4 +1,4 @@
-package com.chuseok22.lab.domain.issue.helper.domain;
+package com.chuseok22.lab.domain.github.issue.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Column;

@@ -41,6 +41,18 @@ public enum ErrorCode {
   GITHUB_ISSUE_PARSING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Github 이슈 파싱 중 오류가 발생했습니다."),
 
   GITHUB_ISSUE_SAVE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Github 이슈 저장 중 오류가 발생했습니다."),
+
+  GITHUB_ISSUE_INVALID_TITLE(HttpStatus.BAD_REQUEST, "Github 이슈 제목이 잘못되었습니다"),
+
+  GITHUB_TOKEN_REQUIRED(HttpStatus.UNAUTHORIZED, "Private 레포지토리에 접근하기위해 Token이 필요합니다."),
+
+  INVALID_GITHUB_TOKEN(HttpStatus.UNAUTHORIZED, "잘못된 Github Token이 요청되었습니다."),
+
+  GITHUB_API_ERROR(HttpStatus.BAD_REQUEST, "Github API 요청에 실패했습니다."),
+
+  // WEB API
+
+  INVALID_RESPONSE_BODY(HttpStatus.BAD_REQUEST, "잘못된 응답 Body 입니다."),
   ;
 
   private final HttpStatus status;
