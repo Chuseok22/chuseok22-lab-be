@@ -1,48 +1,48 @@
 package com.chuseok22.lab.global.util;
 
-import com.chuseok22.lab.global.config.HttpService;
+import static com.chuseok22.lab.global.util.CommonUtil.*;
+
 import com.chuseok22.lab.global.exception.CustomException;
 import com.chuseok22.lab.global.exception.ErrorCode;
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class WebClientService implements HttpService {
+public class WebClientService implements WebService {
 
   private final WebClient webClient;
 
   @Override
-  public String getHtml(String url) {
-    return webClient.get()
-        .uri(url)
-        .retrieve()
-        .bodyToMono(String.class)
-        .block();
+  public JsonNode getJson(String url) {
+    return getJson(url, null);
   }
 
   @Override
-  public <T> T getApiResponse(String url, Class<T> responseType) {
+  public JsonNode getJson(String url, String token) {
     log.debug("WebClient API 요청: URL={}", url);
-    try {
-      T response = webClient.get()
-          .uri(url)
+
+    WebClient.RequestHeadersSpec<?> request = webClient.get().uri(url);
+    if (!nvl(token, "").isEmpty()) {
+      request = request.header(HttpHeaders.AUTHORIZATION, "Bearer " + token);
+    }
+
+    JsonNode response = request
           .retrieve()
-          .bodyToMono(responseType)
-          .doOnSuccess(t -> log.debug("API 응답 성공: type={}", responseType.getSimpleName()))
+          .bodyToMono(JsonNode.class)
+          .doOnSuccess(json -> log.debug("API 응답 성공"))
           .doOnError(throwable -> log.error("API 요청 실패: URL={}, error={}", url, throwable.getMessage()))
           .block();
-      if (response == null) {
-        log.error("API 응답이 null 입니다. URL: {}", url);
-        throw new CustomException(ErrorCode.RESPONSE_BODY_EMPTY);
-      }
-      return response;
-    } catch (Exception e) {
-      log.error("API 요청 오류: URL={}, error={}", url, e.getMessage());
-      throw e;
+
+    if (response == null) {
+      log.error("API 응답 Body가 없습니다.");
+      throw new CustomException(ErrorCode.INVALID_RESPONSE_BODY);
     }
+    return response;
   }
 }
