@@ -15,7 +15,7 @@ public class CookieUtil {
 
     private final JwtUtil jwtUtil;
 
-    private static final String ROOT_DOMAIN = "ticketmate.site";
+    private static final String ROOT_DOMAIN = "chuseok22.com";
 
     /**
      * 새로운 쿠키를 발급합니다
