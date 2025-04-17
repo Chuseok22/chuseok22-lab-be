@@ -5,6 +5,8 @@ import com.chuseok22.lab.domain.auth.dto.LoginRequest;
 import com.chuseok22.lab.domain.auth.service.AuthService;
 import com.chuseok22.lab.global.aspect.LogMonitoringInvocation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -34,6 +36,7 @@ public class AuthController implements AuthControllerDocs{
     return ResponseEntity.ok().build();
   }
 
+  @Override
   @PostMapping("/join")
   @LogMonitoringInvocation
   public ResponseEntity<Void> join(@RequestBody @Valid JoinRequest request) {
@@ -41,12 +44,23 @@ public class AuthController implements AuthControllerDocs{
     return ResponseEntity.status(HttpStatus.CREATED).build();
   }
 
+  @Override
+  @PostMapping("/refresh")
+  @LogMonitoringInvocation
+  public ResponseEntity<Void> refreshAccessToken(
+      HttpServletRequest request, HttpServletResponse response) {
+    authService.refreshAccessToken(request, response);
+    return ResponseEntity.ok().build();
+  }
+
+  @Override
   @GetMapping("/validate/username")
   @LogMonitoringInvocation
   public ResponseEntity<Boolean> isValidationUsername(@RequestParam String username) {
     return ResponseEntity.ok(authService.validateUsername(username));
   }
 
+  @Override
   @GetMapping("/validate/nickname")
   @LogMonitoringInvocation
   public ResponseEntity<Boolean> isValidationNickname(@RequestParam String nickname) {
