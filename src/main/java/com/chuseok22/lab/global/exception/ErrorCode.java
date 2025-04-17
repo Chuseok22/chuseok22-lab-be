@@ -26,9 +26,15 @@ public enum ErrorCode {
 
   EXPIRED_ACCESS_TOKEN(HttpStatus.BAD_REQUEST, "엑세스 토큰이 만료되었습니다."),
 
+  EXPIRED_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "리프레시 토큰이 만료되었습니다."),
+
   DUPLICATE_USERNAME(HttpStatus.BAD_REQUEST, "이미 사용중인 아이디입니다."),
 
   DUPLICATE_NICKNAME(HttpStatus.BAD_REQUEST, "이미 사용중인 닉네임입니다."),
+
+  COOKIES_NOT_FOUND(HttpStatus.NOT_FOUND, "쿠키가 존재하지 않습니다."),
+
+  REFRESH_TOKEN_NOT_FOUND(HttpStatus.NOT_FOUND, "리프레시 토큰을 찾을 수 없습니다."),
 
   // MEMBER
 

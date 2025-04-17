@@ -2,6 +2,8 @@ package com.chuseok22.lab.domain.auth.controller;
 
 import com.chuseok22.lab.domain.auth.dto.JoinRequest;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
 
 public interface AuthControllerDocs {
@@ -24,6 +26,23 @@ public interface AuthControllerDocs {
           """
   )
   ResponseEntity<Void> join(JoinRequest request);
+
+  @Operation(
+      summary = "엑세스 토큰 재발급",
+      description = """
+          
+          인증: `불필요`
+          
+          ### 요청 파라미터 (Parameter)
+          `없읍`
+          
+          ### 사용 방법
+          - httpOnly=true 설정되어있는 쿠키에서 리프레시 토큰을 꺼내 엑세스 토큰을 재발급합니다.
+          
+          ### 유의사항
+          """
+  )
+  ResponseEntity<Void> refreshAccessToken(HttpServletRequest request, HttpServletResponse response);
 
   @Operation(
       summary = "아이디 중복 검증",
