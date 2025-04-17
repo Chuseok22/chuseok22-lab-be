@@ -4,6 +4,7 @@ import com.chuseok22.lab.domain.auth.service.CustomUserDetailsService;
 import com.chuseok22.lab.global.filter.CustomLogoutHandler;
 import com.chuseok22.lab.global.filter.LoginFilter;
 import com.chuseok22.lab.global.filter.TokenAuthenticationFilter;
+import com.chuseok22.lab.global.util.CookieUtil;
 import com.chuseok22.lab.global.util.JwtUtil;
 import java.util.Arrays;
 import java.util.Collections;
@@ -29,6 +30,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
   private final JwtUtil jwtUtil;
+  private final CookieUtil cookieUtil;
   private final CustomUserDetailsService customUserDetailsService;
   private final AuthenticationConfiguration authenticationConfiguration;
   private final CustomLogoutHandler customLogoutHandler;
@@ -39,7 +41,7 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-    LoginFilter loginFilter = new LoginFilter(jwtUtil, authenticationManager(authenticationConfiguration));
+    LoginFilter loginFilter = new LoginFilter(jwtUtil, authenticationManager(authenticationConfiguration), cookieUtil);
     loginFilter.setFilterProcessesUrl("/api/auth/login");
 
     return http
