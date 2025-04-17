@@ -11,10 +11,8 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -28,7 +26,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
   private final JwtUtil jwtUtil;
   private final AuthenticationManager authenticationManager;
   private final ObjectMapper objectMapper = new ObjectMapper();
-  private final RedisTemplate<String, Object> redisTemplate;
 
   @Override
   public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) {
@@ -67,12 +64,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     log.debug("refreshToken = {}", refreshToken);
 
     // RefreshToken을 Redisd에 저장 (key: RT:memberId)
-    redisTemplate.opsForValue().set(
-        JwtUtil.REFRESH_KEY_PREFIX + customUserDetails.getMemberId(),
-        refreshToken,
-        jwtUtil.getRefreshExpirationTime(),
-        TimeUnit.MILLISECONDS
-    );
+    String key = JwtUtil.REFRESH_KEY_PREFIX + customUserDetails.getMemberId();
+    jwtUtil.saveRefreshToken(key, refreshToken);
 
     // 헤더에 AccessToken 추가
     response.addHeader("Authorization", "Bearer " + accessToken);
