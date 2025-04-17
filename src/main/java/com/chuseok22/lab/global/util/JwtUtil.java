@@ -14,6 +14,7 @@ import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 import javax.crypto.SecretKey;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -231,6 +232,17 @@ public class JwtUtil {
     log.debug("JWT에서 인증정보 파싱: username={}", username);
     CustomUserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
     return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+  }
+
+  // 리프레시 토큰 redis 저장
+  public void saveRefreshToken(String key, String refreshToken) {
+    log.debug("리프레시 토큰 저장: key={}", key);
+    redisTemplate.opsForValue().set(
+        key,
+        refreshToken,
+        getRefreshExpirationTime(),
+        TimeUnit.MILLISECONDS
+    );
   }
 
   // redis에 저장된 리프레시 토큰을 삭제
