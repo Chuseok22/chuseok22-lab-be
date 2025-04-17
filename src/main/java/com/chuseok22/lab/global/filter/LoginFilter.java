@@ -4,10 +4,10 @@ import com.chuseok22.lab.domain.auth.dto.CustomUserDetails;
 import com.chuseok22.lab.domain.auth.dto.LoginRequest;
 import com.chuseok22.lab.global.exception.CustomException;
 import com.chuseok22.lab.global.exception.ErrorCode;
+import com.chuseok22.lab.global.util.CookieUtil;
 import com.chuseok22.lab.global.util.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -25,6 +25,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
   private final JwtUtil jwtUtil;
   private final AuthenticationManager authenticationManager;
+  private final CookieUtil cookieUtil;
   private final ObjectMapper objectMapper = new ObjectMapper();
 
   @Override
@@ -67,16 +68,9 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     String key = JwtUtil.REFRESH_KEY_PREFIX + customUserDetails.getMemberId();
     jwtUtil.saveRefreshToken(key, refreshToken);
 
-    // 헤더에 AccessToken 추가
-    response.addHeader("Authorization", "Bearer " + accessToken);
-
-    // 쿠키에 refreshToken 추가
-    Cookie cookie = new Cookie("refreshToken", refreshToken);
-    cookie.setHttpOnly(true); // HttpOnly 설정
-    cookie.setSecure(true);
-    cookie.setPath("/");
-    cookie.setMaxAge((int) (jwtUtil.getRefreshExpirationTime() / 1000)); // 쿠키 maxAge는 초 단위 이므로, 밀리초를 1000으로 나눔
-    response.addCookie(cookie);
+    // 쿠키에 accessToken, refreshToken 추가
+    response.addCookie(cookieUtil.createCookie("accessToken", accessToken));
+    response.addCookie(cookieUtil.createCookie("refreshToken", refreshToken));
 
     // TODO: Swagger 테스트를 위한 임시 반환
     response.getWriter().write("AccessToken: "+ accessToken + "\n");

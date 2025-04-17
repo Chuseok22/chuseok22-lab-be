@@ -7,6 +7,7 @@ import com.chuseok22.lab.domain.member.repository.MemberRepository;
 import com.chuseok22.lab.domain.member.vo.Role;
 import com.chuseok22.lab.global.exception.CustomException;
 import com.chuseok22.lab.global.exception.ErrorCode;
+import com.chuseok22.lab.global.util.CookieUtil;
 import com.chuseok22.lab.global.util.JwtUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,6 +27,7 @@ public class AuthService {
   private final MemberRepository memberRepository;
   private final JwtUtil jwtUtil;
   private final BCryptPasswordEncoder bCryptPasswordEncoder;
+  private final CookieUtil cookieUtil;
 
   /**
    * 회원가입 로직
@@ -95,16 +97,9 @@ public class AuthService {
     // 새로운 refreshToken 저장
     jwtUtil.saveRefreshToken(key, newRefreshToken);
 
-    // 헤더에 AccessToken 추가
-    response.addHeader("Authorization", "Bearer " + newAccessToken);
-
-    // 쿠키에 refreshToken 추가
-    Cookie cookie = new Cookie("refreshToken", newRefreshToken);
-    cookie.setHttpOnly(true); // HttpOnly 설정
-    cookie.setSecure(true);
-    cookie.setPath("/");
-    cookie.setMaxAge((int) (jwtUtil.getRefreshExpirationTime() / 1000)); // 쿠키 maxAge는 초 단위 이므로, 밀리초를 1000으로 나눔
-    response.addCookie(cookie);
+    // 쿠키에 accessToken, refreshToken 추가
+    response.addCookie(cookieUtil.createCookie("accessToken", newAccessToken));
+    response.addCookie(cookieUtil.createCookie("refreshToken", newRefreshToken));
 
     // TODO: Swagger 테스트를 위한 임시 반환
     try {
