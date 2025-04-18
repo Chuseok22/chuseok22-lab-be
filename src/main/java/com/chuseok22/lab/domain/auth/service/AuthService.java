@@ -97,6 +97,10 @@ public class AuthService {
     // 새로운 refreshToken 저장
     jwtUtil.saveRefreshToken(key, newRefreshToken);
 
+    // 기존 쿠키 삭제
+    response.addCookie(cookieUtil.createDeleteCookie("accessToken"));
+    response.addCookie(cookieUtil.createDeleteCookie("refreshToken"));
+
     // 쿠키에 accessToken, refreshToken 추가
     response.addCookie(cookieUtil.createCookie("accessToken", newAccessToken));
     response.addCookie(cookieUtil.createCookie("refreshToken", newRefreshToken));
