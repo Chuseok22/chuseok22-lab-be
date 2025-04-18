@@ -36,40 +36,37 @@ public class IssueHelperService {
     String issueUrl = request.getIssueUrl();
     String token = request.getGithubToken();
 
-    try {
-      IssueHelper issueHelper = issueHelperRepository.findByIssueUrl(issueUrl);
-      if (issueHelper != null) {
-        log.debug("DB에서 기존 이슈 조회: {}", issueUrl);
-      } else {
-        log.debug("새로운 URL 요청: Issue 파싱 시작");
-        issueHelper = parseIssue(member, issueUrl, token);
-      }
-      return IssueResponse.builder()
-          .branchName(issueHelper.getBranchName())
-          .commitMessage(issueHelper.getCommitMessage())
-          .build();
-    } catch (Exception e) {
-      log.error("Issue 처리중 오류 발생: URL={}, error={}", issueUrl, e.getMessage());
-      throw new CustomException(ErrorCode.GITHUB_ISSUE_PROCESSING_ERROR);
+    IssueHelper issueHelper = issueHelperRepository.findByIssueUrl(issueUrl);
+    if (issueHelper != null) {
+      log.debug("DB에서 기존 이슈 조회: {}", issueUrl);
+    } else {
+      log.debug("새로운 URL 요청: {}", issueUrl);
+      // Github API 호출
+      GithubIssueApiResponse githubIssueApiResponse = githubApiService.fetchIssue(member, issueUrl, token);
+      issueHelper = parseIssue(githubIssueApiResponse);
     }
+    return IssueResponse.builder()
+        .branchName(issueHelper.getBranchName())
+        .commitMessage(issueHelper.getCommitMessage())
+        .build();
   }
 
   /**
    * 사용자로부터 URL을 입력 받아 브랜치 명, 커밋 메시지를 생성 후 저장
    *
-   * @param issueUrl issueUrl
+   * @param response title, issueUrl
    * @return branchName, commitMessage
    */
-  private IssueHelper parseIssue(Member member, String issueUrl, String token) {
+  private IssueHelper parseIssue(GithubIssueApiResponse response) {
     try {
-      // Github API 호출
-      GithubIssueApiResponse githubIssueApiResponse = githubApiService.fetchIssue(member, issueUrl, token);
+      String rawTitle = response.title();
+      String issueUrl = response.issueUrl();
 
       // 이슈 번호 추출
       String issueNumber = extractIssueNumber(issueUrl);
 
       // 이슈 제목 추출
-      String issueTitle = extractIssueTitle(githubIssueApiResponse.title());
+      String issueTitle = extractIssueTitle(rawTitle);
 
       // 브랜치명 생성
       String branchName = createBranchName(issueTitle, issueNumber);
