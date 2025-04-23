@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CookieUtil {
 
   private final JwtUtil jwtUtil;
+  private final ServerUtil serverUtil;
 
   @Value("${cookie.domain}")
   private String ROOT_DOMAIN;
@@ -45,7 +46,7 @@ public class CookieUtil {
   public Cookie createDeleteCookie(String name) {
     Cookie cookie = new Cookie(name, null);
     cookie.setHttpOnly(true);
-    cookie.setSecure(true);
+    cookie.setSecure(serverUtil.isProdProfile()); // dev 환경에서는 secure = false
     cookie.setPath("/");
     cookie.setMaxAge(0);
     return cookie;
@@ -59,7 +60,7 @@ public class CookieUtil {
     log.debug("accessToken을 포함한 쿠키를 발급합니다.");
     Cookie cookie = new Cookie("accessToken", accessToken);
     cookie.setHttpOnly(false);
-    cookie.setSecure(true);
+    cookie.setSecure(serverUtil.isProdProfile()); // dev 환경에서는 secure = false
     cookie.setPath("/");
     cookie.setDomain(ROOT_DOMAIN);
     cookie.setMaxAge((int) (jwtUtil.getAccessExpirationTime() / 1000));
@@ -74,7 +75,7 @@ public class CookieUtil {
     log.debug("refreshToken을 포함한 쿠키를 발급합니다.");
     Cookie cookie = new Cookie("refreshToken", refreshToken);
     cookie.setHttpOnly(true);
-    cookie.setSecure(true);
+    cookie.setSecure(serverUtil.isProdProfile()); // dev 환경에서는 secure = false
     cookie.setPath("/");
     cookie.setDomain(ROOT_DOMAIN);
     cookie.setMaxAge((int) (jwtUtil.getRefreshExpirationTime() / 1000));
