@@ -9,7 +9,6 @@ import com.chuseok22.lab.global.aspect.LogMonitoringInvocation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,7 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
     name = "Github Issue API",
     description = "Github Issue 관련 API 제공"
 )
-@Slf4j
 public class IssueHelperController implements IssueHelperControllerDocs {
 
   private final IssueHelperService issueHelperService;
