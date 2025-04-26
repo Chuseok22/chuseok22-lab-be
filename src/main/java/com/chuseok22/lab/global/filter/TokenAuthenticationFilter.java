@@ -1,9 +1,12 @@
 package com.chuseok22.lab.global.filter;
 
-import com.chuseok22.lab.domain.auth.service.CustomUserDetailsService;
+import static com.chuseok22.lab.domain.auth.vo.TokenCategory.ACCESS_TOKEN;
+import static com.chuseok22.lab.global.util.CommonUtil.nvl;
+
 import com.chuseok22.lab.global.config.SecurityUrls;
 import com.chuseok22.lab.global.exception.ErrorCode;
 import com.chuseok22.lab.global.exception.ErrorResponse;
+import com.chuseok22.lab.global.util.CookieUtil;
 import com.chuseok22.lab.global.util.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -28,7 +31,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
   private final JwtUtil jwtUtil;
-  private final CustomUserDetailsService customUserDetailsService;
+  private final CookieUtil cookieUtil;
   private static final AntPathMatcher pathMatcher = new AntPathMatcher();
 
   @Override
@@ -51,6 +54,9 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
     try {
       String token = null;
       String bearerToken = request.getHeader("Authorization");
+      if (nvl(bearerToken, "").isEmpty()) {
+        token = cookieUtil.getCookie(request, ACCESS_TOKEN.getPrefix()).getValue();
+      }
       // 토큰 추출: 요청 타입에 따라 헤더 또는 파라미터에서 토큰 추출
       if (isApiRequest) {
         log.debug("일반 API 요청입니다.");

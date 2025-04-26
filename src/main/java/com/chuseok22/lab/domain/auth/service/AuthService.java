@@ -1,5 +1,9 @@
 package com.chuseok22.lab.domain.auth.service;
 
+import static com.chuseok22.lab.domain.auth.vo.TokenCategory.ACCESS_TOKEN;
+import static com.chuseok22.lab.domain.auth.vo.TokenCategory.REFRESH_TOKEN;
+import static com.chuseok22.lab.global.util.CommonUtil.nvl;
+
 import com.chuseok22.lab.domain.auth.dto.CustomUserDetails;
 import com.chuseok22.lab.domain.auth.dto.JoinRequest;
 import com.chuseok22.lab.domain.member.domain.Member;
@@ -64,19 +68,11 @@ public class AuthService {
     String refreshToken = null;
 
     // 쿠키에서 리프레시 토큰 추출
-    Cookie[] cookies = request.getCookies();
-    if (cookies == null) {
-      log.error("쿠키가 존재하지 않습니다.");
-      throw new CustomException(ErrorCode.COOKIES_NOT_FOUND);
-    }
-    for (Cookie cookie : cookies) {
-      if (cookie.getName().equals("refreshToken")) {
-        refreshToken = cookie.getValue();
-        break;
-      }
-    }
+    Cookie cookie = cookieUtil.getCookie(request, REFRESH_TOKEN.getPrefix());
+    refreshToken = cookie.getValue();
+
     // 리프레시 토큰이 없는 경우
-    if (refreshToken == null || refreshToken.isBlank()) {
+    if (nvl(refreshToken, "").isEmpty()) {
       log.error("쿠키에서 refreshToken을 찾을 수 없습니다.");
       throw new CustomException(ErrorCode.REFRESH_TOKEN_NOT_FOUND);
     }
@@ -98,12 +94,12 @@ public class AuthService {
     jwtUtil.saveRefreshToken(key, newRefreshToken);
 
     // 기존 쿠키 삭제
-    response.addCookie(cookieUtil.createDeleteCookie("accessToken"));
-    response.addCookie(cookieUtil.createDeleteCookie("refreshToken"));
+    response.addCookie(cookieUtil.createDeleteCookie(ACCESS_TOKEN.getPrefix()));
+    response.addCookie(cookieUtil.createDeleteCookie(REFRESH_TOKEN.getPrefix()));
 
     // 쿠키에 accessToken, refreshToken 추가
-    response.addCookie(cookieUtil.createCookie("accessToken", newAccessToken));
-    response.addCookie(cookieUtil.createCookie("refreshToken", newRefreshToken));
+    response.addCookie(cookieUtil.createCookie(ACCESS_TOKEN.getPrefix(), newAccessToken));
+    response.addCookie(cookieUtil.createCookie(REFRESH_TOKEN.getPrefix(), newRefreshToken));
 
     // TODO: Swagger 테스트를 위한 임시 반환
     try {

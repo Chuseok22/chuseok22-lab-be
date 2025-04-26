@@ -1,8 +1,12 @@
 package com.chuseok22.lab.global.util;
 
+import static com.chuseok22.lab.domain.auth.vo.TokenCategory.ACCESS_TOKEN;
+import static com.chuseok22.lab.domain.auth.vo.TokenCategory.REFRESH_TOKEN;
+
 import com.chuseok22.lab.global.exception.CustomException;
 import com.chuseok22.lab.global.exception.ErrorCode;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,15 +25,35 @@ public class CookieUtil {
   private String ROOT_DOMAIN;
 
   /**
+   * 특정 쿠키를 반환합니다
+   */
+  @Transactional(readOnly = true)
+  public Cookie getCookie(HttpServletRequest request, String name) {
+    Cookie[] cookies = request.getCookies();
+    if (cookies == null) {
+      log.error("쿠키가 존재하지 않습니다.");
+      throw new CustomException(ErrorCode.COOKIES_NOT_FOUND);
+    }
+
+    for (Cookie cookie : cookies) {
+      if (cookie.getName().equalsIgnoreCase(name)) {
+        return cookie;
+      }
+    }
+    log.error("{}에 해당하는 쿠키가 없습니다.", name);
+    throw new CustomException(ErrorCode.COOKIES_NOT_FOUND);
+  }
+
+  /**
    * 새로운 쿠키를 발급합니다
    *
    * @return 발급된 쿠키를 반환합니다
    */
   @Transactional
   public Cookie createCookie(String name, String token) {
-    if (name.equals("accessToken")) {
+    if (name.equals(ACCESS_TOKEN.getPrefix())) {
       return createAccessTokenCookie(token);
-    } else if (name.equals("refreshToken")) {
+    } else if (name.equals(REFRESH_TOKEN.getPrefix())) {
       return createRefreshTokenCookie(token);
     } else {
       log.error("잘못된 Cookie key가 요청됐습니다. 요청값: {}", name);

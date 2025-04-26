@@ -1,6 +1,5 @@
 package com.chuseok22.lab.global.config;
 
-import com.chuseok22.lab.domain.auth.service.CustomUserDetailsService;
 import com.chuseok22.lab.global.filter.CustomLogoutHandler;
 import com.chuseok22.lab.global.filter.LoginFilter;
 import com.chuseok22.lab.global.filter.TokenAuthenticationFilter;
@@ -31,7 +30,6 @@ public class SecurityConfig {
 
   private final JwtUtil jwtUtil;
   private final CookieUtil cookieUtil;
-  private final CustomUserDetailsService customUserDetailsService;
   private final AuthenticationConfiguration authenticationConfiguration;
   private final CustomLogoutHandler customLogoutHandler;
 
@@ -66,7 +64,7 @@ public class SecurityConfig {
             session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         )
         .addFilterBefore(
-            new TokenAuthenticationFilter(jwtUtil, customUserDetailsService),
+            new TokenAuthenticationFilter(jwtUtil, cookieUtil),
             UsernamePasswordAuthenticationFilter.class
         )
         .addFilterAt(
