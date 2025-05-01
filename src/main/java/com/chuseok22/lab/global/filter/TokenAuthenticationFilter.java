@@ -55,6 +55,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
       String token = null;
       String bearerToken = request.getHeader("Authorization");
       if (nvl(bearerToken, "").isEmpty()) {
+        log.debug("Authorization 헤더가 존재하지않아 쿠키에서 토큰 획득을 시도합니다.");
         token = cookieUtil.getCookie(request, ACCESS_TOKEN.getPrefix()).getValue();
       }
       // 토큰 추출: 요청 타입에 따라 헤더 또는 파라미터에서 토큰 추출
