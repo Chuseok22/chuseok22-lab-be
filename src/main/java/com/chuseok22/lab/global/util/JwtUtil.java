@@ -1,5 +1,8 @@
 package com.chuseok22.lab.global.util;
 
+import static com.chuseok22.lab.domain.auth.vo.TokenCategory.ACCESS_TOKEN;
+import static com.chuseok22.lab.domain.auth.vo.TokenCategory.REFRESH_TOKEN;
+
 import com.chuseok22.lab.domain.auth.dto.CustomUserDetails;
 import com.chuseok22.lab.domain.auth.service.CustomUserDetailsService;
 import com.chuseok22.lab.global.exception.CustomException;
@@ -44,8 +47,6 @@ public class JwtUtil {
   @Value("${jwt.issuer}")
   private String issuer; // JWT 발급자
 
-  private static final String ACCESS_CATEGORY = "access";
-  private static final String REFRESH_CATEGORY = "refresh";
   public static final String REFRESH_KEY_PREFIX = "RT:";
 
   // 토큰에서 username 파싱
@@ -97,7 +98,7 @@ public class JwtUtil {
    */
   public String createAccessToken(CustomUserDetails customUserDetails) {
     log.debug("엑세스 토큰 생성 중: 회원: {}", customUserDetails.getUsername());
-    return createToken(ACCESS_CATEGORY, customUserDetails, accessTokenExpTime);
+    return createToken(ACCESS_TOKEN.getPrefix(), customUserDetails, accessTokenExpTime);
   }
 
   /**
@@ -108,7 +109,7 @@ public class JwtUtil {
    */
   public String createRefreshToken(CustomUserDetails customUserDetails) {
     log.debug("리프래시 토큰 생성 중: 회원: {}", customUserDetails.getUsername());
-    return createToken(REFRESH_CATEGORY, customUserDetails, refreshTokenExpTime);
+    return createToken(REFRESH_TOKEN.getPrefix(), customUserDetails, refreshTokenExpTime);
   }
 
   /**

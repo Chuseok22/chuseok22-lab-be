@@ -1,5 +1,8 @@
 package com.chuseok22.lab.global.filter;
 
+import static com.chuseok22.lab.domain.auth.vo.TokenCategory.ACCESS_TOKEN;
+import static com.chuseok22.lab.domain.auth.vo.TokenCategory.REFRESH_TOKEN;
+
 import com.chuseok22.lab.domain.auth.dto.CustomUserDetails;
 import com.chuseok22.lab.domain.auth.dto.LoginRequest;
 import com.chuseok22.lab.global.exception.CustomException;
@@ -69,8 +72,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     jwtUtil.saveRefreshToken(key, refreshToken);
 
     // 쿠키에 accessToken, refreshToken 추가
-    response.addCookie(cookieUtil.createCookie("accessToken", accessToken));
-    response.addCookie(cookieUtil.createCookie("refreshToken", refreshToken));
+    response.addCookie(cookieUtil.createCookie(ACCESS_TOKEN.getPrefix(), accessToken));
+    response.addCookie(cookieUtil.createCookie(REFRESH_TOKEN.getPrefix(), refreshToken));
 
     // TODO: Swagger 테스트를 위한 임시 반환
     response.getWriter().write("AccessToken: "+ accessToken + "\n");
