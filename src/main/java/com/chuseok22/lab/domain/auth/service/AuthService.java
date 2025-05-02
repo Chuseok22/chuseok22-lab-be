@@ -146,7 +146,7 @@ public class AuthService {
 
     // 토큰이 refresh인지 확인 (발급 시 페이로드에 명시)
     String category = jwtUtil.getCategory(token);
-    if (!category.equals("refresh")) {
+    if (!category.equals(REFRESH_TOKEN.getPrefix())) {
       log.error("요청된 토큰이 refreshToken이 아닙니다. 요청된 토큰 카테고리: {}", category);
       throw new CustomException(ErrorCode.INVALID_REFRESH_TOKEN);
     }
