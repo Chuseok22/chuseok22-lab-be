@@ -19,6 +19,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -41,6 +43,7 @@ public class SecurityConfig {
 
     LoginFilter loginFilter = new LoginFilter(jwtUtil, authenticationManager(authenticationConfiguration), cookieUtil);
     loginFilter.setFilterProcessesUrl("/api/auth/login");
+    TokenAuthenticationFilter tokenAuthenticationFilter = new TokenAuthenticationFilter(jwtUtil, cookieUtil);
 
     return http
         .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -57,19 +60,20 @@ public class SecurityConfig {
         .logout(logout -> logout
             .logoutUrl("/api/auth/logout") // "/logout" 경로로 접근 시 로그아웃
             .addLogoutHandler(customLogoutHandler)
-            .logoutSuccessUrl("/") // 로그아웃 성공 후 root 경로로 이동
+            .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler())
             .invalidateHttpSession(true)
         )
         .sessionManagement(session ->
             session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         )
         .addFilterBefore(
-            new TokenAuthenticationFilter(jwtUtil, cookieUtil),
+            tokenAuthenticationFilter,
             UsernamePasswordAuthenticationFilter.class
         )
         .addFilterAt(
             loginFilter, UsernamePasswordAuthenticationFilter.class
         )
+        .addFilterBefore(tokenAuthenticationFilter, LogoutFilter.class)
         .build();
   }
 
