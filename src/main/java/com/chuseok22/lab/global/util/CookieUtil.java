@@ -64,6 +64,7 @@ public class CookieUtil {
   /**
    * 기존 쿠키를 삭제합니다
    *
+   * @param name 쿠키 key (accessToken, refreshToken)
    * @return MaxAge=0 인 쿠키를 반환합니다
    */
   @Transactional
