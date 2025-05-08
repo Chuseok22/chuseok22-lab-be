@@ -1,11 +1,11 @@
 package com.chuseok22.lab.global.filter;
 
-import com.chuseok22.lab.domain.member.domain.Member;
-import com.chuseok22.lab.domain.member.repository.MemberRepository;
-import com.chuseok22.lab.global.exception.CustomException;
-import com.chuseok22.lab.global.exception.ErrorCode;
+import static com.chuseok22.lab.domain.auth.vo.TokenCategory.ACCESS_TOKEN;
+import static com.chuseok22.lab.domain.auth.vo.TokenCategory.REFRESH_TOKEN;
+
+import com.chuseok22.lab.domain.auth.dto.CustomUserDetails;
+import com.chuseok22.lab.global.util.CookieUtil;
 import com.chuseok22.lab.global.util.JwtUtil;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -20,41 +20,23 @@ import org.springframework.stereotype.Component;
 public class CustomLogoutHandler implements LogoutHandler {
 
   private final JwtUtil jwtUtil;
-  private final MemberRepository memberRepository;
+  private final CookieUtil cookieUtil;
 
   @Override
   public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
 
-    // 1. 쿠키에서 리프레시 토큰 추출 및 삭제
-    String refreshToken = null;
-    Cookie[] cookies = request.getCookies();
-    if (cookies != null) {
-      for (Cookie cookie : cookies) {
-        if ("refreshToken".equals(cookie.getName())) {
-          refreshToken = cookie.getValue();
-          // 쿠키 삭제
-          cookie.setMaxAge(0);
-          cookie.setPath("/");
-          response.addCookie(cookie);
-          log.debug("리프레시 토큰 쿠키 삭제 완료");
-          break;
-        }
-      }
-    }
+    // 사용자 정보 획득
+    CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
+    log.debug("CustomUserDetails: {}", customUserDetails.getMemberId());
 
-    // 2. Redis에서 리프레시 토큰 삭제
-    if (authentication != null && refreshToken != null) {
-      String username = jwtUtil.getUsername(refreshToken);
-      Member member = memberRepository.findByUsername(username)
-          .orElseThrow(() -> {
-            log.error("리프레시 토큰에 등록된 사용자를 찾을 수 없습니다.");
-            return new CustomException(ErrorCode.MEMBER_NOT_FOUND);
-          });
+    // Redis에서 리프레시 토큰 삭제
+    String key = JwtUtil.REFRESH_KEY_PREFIX + customUserDetails.getMemberId();
+    jwtUtil.deleteRefreshToken(key);
 
-      // 리프레시 토큰 삭제
-      String key = JwtUtil.REFRESH_KEY_PREFIX + member.getMemberId();
-      jwtUtil.deleteRefreshToken(key);
-    }
+    // 기존 쿠키 삭제
+    response.addCookie(cookieUtil.createDeleteCookie(ACCESS_TOKEN.getPrefix()));
+    response.addCookie(cookieUtil.createDeleteCookie(REFRESH_TOKEN.getPrefix()));
+    response.setStatus(HttpServletResponse.SC_OK);
   }
 }
 
