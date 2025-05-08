@@ -65,11 +65,10 @@ public class AuthService {
   @Transactional
   public void refreshAccessToken(HttpServletRequest request, HttpServletResponse response) {
     log.debug("accessToken이 만료되어 재발급을 진행합니다.");
-    String refreshToken = null;
 
     // 쿠키에서 리프레시 토큰 추출
     Cookie cookie = cookieUtil.getCookie(request, REFRESH_TOKEN.getPrefix());
-    refreshToken = cookie.getValue();
+    String refreshToken = cookie.getValue();
 
     // 리프레시 토큰이 없는 경우
     if (nvl(refreshToken, "").isEmpty()) {

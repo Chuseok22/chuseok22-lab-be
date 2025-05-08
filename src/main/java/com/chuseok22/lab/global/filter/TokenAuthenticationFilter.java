@@ -87,7 +87,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
         // 관리자 페이지 접근 권한 체크: 관리자 권한 없으면 로그인 페이지로 리다이렉트
         if (isAdminPageRequest && !hasAdminRole(authentication)) {
           log.error("관리자 권한이 없습니다. 로그인페이지로 리다이렉트합니다.");
-          response.sendRedirect("/login");
+          response.sendRedirect("/auth/login");
           return;
         }
 
@@ -110,7 +110,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
       } else if (isAdminPageRequest) {
         // 관리자 페이지: 로그인 페이지로 리다이렉트
         log.error("관리자 페이지 요청 시, 토큰이 없거나 유효하지 않습니다.");
-        response.sendRedirect("/login");
+        response.sendRedirect("/auth/login");
         return;
       }
     } catch (ExpiredJwtException e) {
@@ -119,7 +119,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
       if (isApiRequest) {
         sendErrorResponse(response, ErrorCode.EXPIRED_ACCESS_TOKEN);
       } else {
-        response.sendRedirect("/login");
+        response.sendRedirect("/auth/login");
       }
       return;
     }
