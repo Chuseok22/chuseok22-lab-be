@@ -1,7 +1,6 @@
 package com.chuseok22.lab.global.config;
 
 import com.chuseok22.lab.global.filter.CustomLogoutHandler;
-import com.chuseok22.lab.global.filter.CustomLogoutSuccessHandler;
 import com.chuseok22.lab.global.filter.LoginFilter;
 import com.chuseok22.lab.global.filter.TokenAuthenticationFilter;
 import com.chuseok22.lab.global.util.CookieUtil;
@@ -20,6 +19,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -34,7 +34,7 @@ public class SecurityConfig {
   private final CookieUtil cookieUtil;
   private final AuthenticationConfiguration authenticationConfiguration;
   private final CustomLogoutHandler customLogoutHandler;
-  private final CustomLogoutSuccessHandler customLogoutSuccessHandler;
+//  private final CustomLogoutSuccessHandler customLogoutSuccessHandler;
 
   /**
    * Security Filter Chain 설정
@@ -61,7 +61,7 @@ public class SecurityConfig {
         .logout(logout -> logout
             .logoutUrl("/api/auth/logout") // "/logout" 경로로 접근 시 로그아웃
             .addLogoutHandler(customLogoutHandler)
-            .logoutSuccessHandler(customLogoutSuccessHandler)
+            .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler())
             .invalidateHttpSession(true)
         )
         .sessionManagement(session ->
